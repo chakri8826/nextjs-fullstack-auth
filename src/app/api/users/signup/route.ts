@@ -38,9 +38,10 @@ export async function POST(request: NextRequest) {
         //send verification email
         try {
             console.log("Sending verification email to:", email);
-            await sendEmail({email, emailType: "VERIFY", userId: savedUser._id})
-        } catch (emailError: any) {
-            console.log("Email sending failed:", emailError.message);
+            await sendEmail({ email, emailType: "VERIFY", userId: savedUser._id })
+        } catch (emailError: unknown) {
+            const errorMessage = emailError instanceof Error ? emailError.message : 'Unknown error';
+            console.log("Email sending failed:", errorMessage);
             // Don't fail the signup if email fails, just log it
         }
 
@@ -53,8 +54,9 @@ export async function POST(request: NextRequest) {
 
 
 
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 })
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+        return NextResponse.json({ error: errorMessage }, { status: 500 })
 
     }
 }

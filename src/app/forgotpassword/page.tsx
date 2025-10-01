@@ -9,7 +9,6 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [emailValidated, setEmailValidated] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -17,7 +16,6 @@ export default function ForgotPasswordPage() {
       setButtonDisabled(false);
     } else {
       setButtonDisabled(true);
-      setEmailValidated(false);
       setError("");
     }
   }, [email]);
@@ -35,20 +33,24 @@ export default function ForgotPasswordPage() {
       const response = await axios.post("/api/users/check-email", { email });
 
       if (response.data.exists) {
-        setEmailValidated(true);
         toast.success("If an account exists for the email provided, a message has been sent with further instructions.");
         // trigger server to send reset email without importing server-only code in client
         await axios.post("/api/users/request-password-reset", { email });
       }
-    } catch (error: any) {
-      if (error.response?.status === 404) {
-        setError("No account found with this email address. Please check your email or sign up for a new account.");
-        toast.error("No account found with this email address");
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number } };
+        if (axiosError.response?.status === 404) {
+          setError("No account found with this email address. Please check your email or sign up for a new account.");
+          toast.error("No account found with this email address");
+        } else {
+          setError("An error occurred while checking your email. Please try again.");
+          toast.error("Error checking email");
+        }
       } else {
         setError("An error occurred while checking your email. Please try again.");
         toast.error("Error checking email");
       }
-      setEmailValidated(false);
     } finally {
       setLoading(false);
     }
