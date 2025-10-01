@@ -3,7 +3,13 @@ import User from "@/models/userModel";
 import bcryptjs from 'bcryptjs';
 
 
-export const sendEmail = async ({ email, emailType, userId }: any) => {
+interface SendEmailParams {
+    email: string;
+    emailType: "VERIFY" | "RESET";
+    userId: string;
+}
+
+export const sendEmail = async ({ email, emailType, userId }: SendEmailParams) => {
     try {
         // create a hased token
         const hashedToken = await bcryptjs.hash(userId.toString(), 10)
@@ -16,7 +22,7 @@ export const sendEmail = async ({ email, emailType, userId }: any) => {
                 { forgotPasswordToken: hashedToken, forgotPasswordTokenExpiry: Date.now() + 3600000 })
         }
 
-        var transport = nodemailer.createTransport({
+        const transport = nodemailer.createTransport({
             host: "sandbox.smtp.mailtrap.io",
             port: 2525,
             auth: {
@@ -40,7 +46,8 @@ export const sendEmail = async ({ email, emailType, userId }: any) => {
         const mailresponse = await transport.sendMail(mailOptions);
         return mailresponse;
 
-    } catch (error: any) {
-        throw new Error(error.message);
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Email sending failed';
+        throw new Error(errorMessage);
     }
 }

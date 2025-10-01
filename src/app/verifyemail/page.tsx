@@ -12,9 +12,9 @@ export default function VerifyEmailPage() {
 
     const verifyUserEmail = async () => {
         try {
-            await axios.post('/api/users/verifyemail', {token})
+            await axios.post('/api/users/verifyemail', { token })
             setVerified(true);
-        } catch (error:any) {
+        } catch {
             setError(true);
         }
     }
@@ -26,12 +26,12 @@ export default function VerifyEmailPage() {
 
 
     useEffect(() => {
-        if(token.length > 0) {
+        if (token.length > 0) {
             verifyUserEmail();
         }
-    }, [token]);
+    }, [token, verifyUserEmail]);
 
-    return(
+    return (
         <div className="flex flex-col items-center justify-center min-h-screen py-2">
 
             <h1 className="text-4xl">Verify Email</h1>
