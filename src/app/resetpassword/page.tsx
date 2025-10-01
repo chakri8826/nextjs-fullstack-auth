@@ -22,8 +22,13 @@ export default function ResetPasswordPage() {
     try {
       await axios.post("/api/users/verify-reset-token", { token });
       setVerified(true);
-    } catch (err: any) {
-      setError(err.response?.data?.error || "Invalid or expired token");
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { error?: string } } };
+        setError(axiosError.response?.data?.error || "Invalid or expired token");
+      } else {
+        setError("Invalid or expired token");
+      }
     }
   };
 
@@ -36,8 +41,13 @@ export default function ResetPasswordPage() {
       await axios.post("/api/users/reset-password", { token, password });
       toast.success("password reset successfull")
       setResetDone(true);
-    } catch (err: any) {
-      setError(err.response?.data?.error || "Something went wrong");
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { error?: string } } };
+        setError(axiosError.response?.data?.error || "Something went wrong");
+      } else {
+        setError("Something went wrong");
+      }
     }
   };
 
@@ -45,7 +55,7 @@ export default function ResetPasswordPage() {
     if (token) {
       verifyResetToken();
     }
-  }, [token]);
+  }, [token, verifyResetToken]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">

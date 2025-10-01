@@ -24,11 +24,16 @@ export default function SignupPage() {
             const response = await axios.post("/api/users/signup", user);
             console.log("Signup success", response.data);
             router.push("/login");
-        } catch (error: any) {
-            console.log("Signup failed", error.message);
-            console.log("Error response:", error.response?.data);
-
-            toast.error(error.response?.data?.error || error.message);
+        } catch (error: unknown) {
+            let message = 'Signup failed';
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { data?: { error?: string } } };
+                message = axiosError.response?.data?.error || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            console.log("Signup failed", message);
+            toast.error(message);
         } finally {
             setLoading(false);
         }
